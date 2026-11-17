@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(FlowFmxHost VERSION 0.2.0 LANGUAGES C CXX)
+project(FlowFmxHost VERSION 0.2.1 LANGUAGES C CXX)
 
 # short build identifier shown next to the version (CI passes the commit hash)
 set(FMX_BUILD_ID "dev" CACHE STRING "Build identifier shown in the plugin window")

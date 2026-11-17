@@ -197,6 +197,9 @@ juce::String FlowFmxEditor::buildBridgeScript() const
   };
   window.__spaceMeta = Object.assign(window.__spaceMeta || {}, %META%);
   window.__vstCustomState = %CUSTOM%;
+  // No browser right-click menu (Back / Reload / Inspect ...) inside the plugin. Only the
+  // default action is blocked, so a Flow UI's own right-click handling keeps working.
+  window.addEventListener("contextmenu", function (e) { e.preventDefault(); }, true);
   // Stop WebView2 from navigating away when a file is dropped, and hand the dropped files'
   // real paths to the host. A page can't read file paths itself, but WebView2 passes them to
   // the host for File objects sent with postMessageWithAdditionalObjects(). This runs in the
