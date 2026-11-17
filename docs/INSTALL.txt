@@ -1,0 +1,41 @@
+Flow FMX Host - install guide (Windows, FL Studio)
+===================================================
+
+This zip contains two plugins:
+
+  Flow FMX Instrument.vst3   - for Flow instruments (like "Studio Sampler")
+  Flow FMX Effect.vst3       - for Flow effects (experimental)
+
+1. INSTALL
+   Copy BOTH ".vst3" folders into:
+
+       C:\Program Files\Common Files\VST3
+
+   (Windows may ask for administrator permission - click Continue.)
+
+2. FIND THEM IN FL STUDIO
+   - Open FL Studio.
+   - Options > Manage plugins > click "Find more plugins" (or "Start scan").
+   - "Flow FMX Instrument" now appears under Generators.
+
+3. USE IT
+   - Add "Flow FMX Instrument" to the Channel Rack (like any synth).
+   - Open it and click "Load .fmx..." at the top (or drag the .fmx file onto
+     the window), then pick your .fmx file, e.g. Studio_Sampler_v8.fmx.
+   - The plugin's own interface appears. Play notes with your keyboard or
+     the piano roll.
+   - The .fmx is saved inside your FL Studio project, so projects keep working
+     even if you move or delete the .fmx file. (Audio samples you load inside
+     the plugin are referenced by their file path, so keep those in place.)
+
+REQUIREMENTS
+   Windows 10 or 11 (64-bit). The interface uses Microsoft Edge WebView2,
+   which is already installed on almost all Windows 10/11 PCs. If the window
+   stays blank, install the "Evergreen WebView2 Runtime" from Microsoft:
+   https://developer.microsoft.com/microsoft-edge/webview2/
+
+KNOWN LIMITATIONS
+   - Dragging an audio file onto the waveform opens a file picker instead
+     (WebView2 doesn't tell the plugin which file was dropped).
+   - Automation shows all Flow parameters by name; the remaining slots are
+     listed as "(unused N)".

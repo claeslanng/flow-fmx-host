@@ -1,0 +1,65 @@
+name: Build Windows plugins
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install WebView2 SDK (NuGet)
+        shell: pwsh
+        run: nuget install Microsoft.Web.WebView2 -OutputDirectory "$env:RUNNER_TEMP\nuget" -NonInteractive
+
+      - name: Configure (clang-cl)
+        shell: pwsh
+        run: >
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -T ClangCL
+          "-DJUCE_WEBVIEW2_PACKAGE_LOCATION=$($env:RUNNER_TEMP -replace '\\','/')/nuget"
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Test (load Studio Sampler, play notes, save/restore state)
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Recurse build -Filter fmx_plugin_test.exe | Select-Object -First 1
+          & $exe.FullName tests/fixtures/Studio_Sampler_v8.fmx
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item -Recurse "build/FlowFmxInstrument_artefacts/Release/VST3/Flow FMX Instrument.vst3" dist/
+          Copy-Item -Recurse "build/FlowFmxEffect_artefacts/Release/VST3/Flow FMX Effect.vst3" dist/
+          Copy-Item docs/INSTALL.txt dist/
+          Compress-Archive -Path dist/* -DestinationPath FlowFMX-Windows-x64.zip -Force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FlowFMX-Windows-x64
+          path: FlowFMX-Windows-x64.zip
+
+      - name: Publish "latest" download
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag 2>$null
+          $global:LASTEXITCODE = 0
+          gh release create latest FlowFMX-Windows-x64.zip `
+            --target $env:GITHUB_SHA `
+            --title "Latest build" `
+            --notes "Automatic build of commit $env:GITHUB_SHA. Download FlowFMX-Windows-x64.zip below and see INSTALL.txt inside."
