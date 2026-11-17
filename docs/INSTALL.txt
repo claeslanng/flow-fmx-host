@@ -34,8 +34,8 @@ REQUIREMENTS
    stays blank, install the "Evergreen WebView2 Runtime" from Microsoft:
    https://developer.microsoft.com/microsoft-edge/webview2/
 
-KNOWN LIMITATIONS
-   - Dragging an audio file onto the waveform opens a file picker instead
-     (WebView2 doesn't tell the plugin which file was dropped).
+TIPS & KNOWN LIMITATIONS
+   - You can drag audio files onto the sample area, and drag an .fmx file
+     anywhere onto the plugin window to load it.
    - Automation shows all Flow parameters by name; the remaining slots are
      listed as "(unused N)".

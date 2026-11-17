@@ -172,9 +172,22 @@ juce::String FlowFmxEditor::buildBridgeScript() const
   };
   window.__spaceMeta = Object.assign(window.__spaceMeta || {}, %META%);
   window.__vstCustomState = %CUSTOM%;
-  // stop WebView2 from navigating away when a file is dropped outside a drop zone
+  // Stop WebView2 from navigating away when a file is dropped, and hand the dropped files'
+  // real paths to the host. A page can't read file paths itself, but WebView2 passes them to
+  // the host for File objects sent with postMessageWithAdditionalObjects(). This runs in the
+  // capture phase, i.e. before the Flow UI's own drop handler asks for the path.
   window.addEventListener("dragover", function (e) { e.preventDefault(); });
-  window.addEventListener("drop", function (e) { e.preventDefault(); });
+  window.addEventListener("drop", function (e) {
+    e.preventDefault();
+    var files = e.dataTransfer && e.dataTransfer.files;
+    var wv = window.chrome && window.chrome.webview;
+    if (files && files.length > 0 && wv && typeof wv.postMessageWithAdditionalObjects === "function") {
+      try {
+        wv.postMessageWithAdditionalObjects(
+          JSON.stringify({ eventId: "fmxDrop", payload: { count: files.length } }), files);
+      } catch (err) { console.error(err); }
+    }
+  }, true);
   document.addEventListener("DOMContentLoaded", function () {
     window.IPlugSendMsg({ msg: "__fmxReady" });
     startFitToWindow();
@@ -267,6 +280,11 @@ void FlowFmxEditor::rebuildWebView()
             if (safe != nullptr)
                 safe->handleUiMessage (msg);
         })
+        .withEventListener ("fmxDrop", [safe = juce::Component::SafePointer<FlowFmxEditor> (this)] (juce::var payload)
+        {
+            if (safe != nullptr)
+                safe->handleFilesDroppedOnPage (payload);
+        })
         .withResourceProvider ([html] (const juce::String& path) -> std::optional<juce::WebBrowserComponent::Resource>
         {
             if (path == "/" || path == "/index.html" || path.isEmpty())
@@ -341,8 +359,9 @@ void FlowFmxEditor::handleUiMessage (const juce::var& m)
     }
     else if (type == "vstDropAudioFile")
     {
-        // WebView2 doesn't tell us the dropped file's path, so ask with a file chooser instead.
-        chooseAudioFile ("Select audio sample", "__vstOnAudioFileDropped");
+        // The UI's drop zone wants the dropped file's path. Our capture-phase drop handler has
+        // normally delivered it already (handleFilesDroppedOnPage); give it a moment otherwise.
+        answerDropRequest (0);
     }
     else if (type == "vstInspectAudioFile")
     {
@@ -384,6 +403,65 @@ void FlowFmxEditor::chooseAudioFile (const juce::String& title, const juce::Stri
                               o->setProperty ("path", f.existsAsFile() ? juce::var (f.getFullPathName()) : juce::var());
                               safe->callJs (replyFunction, juce::var (o));
                           });
+}
+
+void FlowFmxEditor::handleFilesDroppedOnPage (const juce::var& payload)
+{
+    auto* paths = payload["paths"].getArray();
+    if (paths == nullptr || paths->isEmpty())
+        return; // old WebView2 runtime: answerDropRequest() falls back to a file chooser
+
+    const auto now = juce::Time::getMillisecondCounterHiRes();
+
+    // an .fmx dropped anywhere on the UI loads it
+    for (auto& p : *paths)
+    {
+        if (p.toString().endsWithIgnoreCase (".fmx"))
+        {
+            fmxDropTime = now;
+            const juce::File file (p.toString());
+            // deferred: we're inside a WebView callback and loading replaces the WebView
+            juce::MessageManager::callAsync ([safe = juce::Component::SafePointer<FlowFmxEditor> (this), file]
+            {
+                if (safe != nullptr)
+                    safe->loadFmx (file);
+            });
+            return;
+        }
+    }
+
+    droppedPath = (*paths)[0].toString();
+    droppedPathTime = now;
+}
+
+void FlowFmxEditor::answerDropRequest (int attempt)
+{
+    const auto now = juce::Time::getMillisecondCounterHiRes();
+
+    if (droppedPath.isNotEmpty() && now - droppedPathTime < 3000.0)
+    {
+        auto* o = new juce::DynamicObject();
+        o->setProperty ("path", droppedPath);
+        droppedPath.clear();
+        callJs ("__vstOnAudioFileDropped", juce::var (o));
+        return;
+    }
+
+    if (now - fmxDropTime < 3000.0)
+        return; // an .fmx was dropped onto the sample area: it's being loaded instead
+
+    if (attempt < 5)
+    {
+        juce::Timer::callAfterDelay (60, [safe = juce::Component::SafePointer<FlowFmxEditor> (this), attempt]
+        {
+            if (safe != nullptr)
+                safe->answerDropRequest (attempt + 1);
+        });
+        return;
+    }
+
+    // the path never arrived (very old WebView2 runtime): ask with a file chooser instead
+    chooseAudioFile ("Select audio sample", "__vstOnAudioFileDropped");
 }
 
 //==============================================================================

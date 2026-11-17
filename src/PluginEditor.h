@@ -34,6 +34,8 @@ private:
 
     void handleUiMessage (const juce::var& msg);
     void chooseAudioFile (const juce::String& title, const juce::String& replyFunction);
+    void handleFilesDroppedOnPage (const juce::var& payload);
+    void answerDropRequest (int attempt);
     void callJs (const juce::String& function, const juce::var& argument);
     void sendAllParams();
 
@@ -50,6 +52,10 @@ private:
     int tick = 0;
     bool pageReady = false;
     bool sizedForCurrentFmx = false;
+
+    // file drops onto the web UI (paths delivered by the patched WebView2 backend)
+    juce::String droppedPath;
+    double droppedPathTime = 0.0, fmxDropTime = 0.0;
 
     static constexpr int topBarHeight = 30;
 

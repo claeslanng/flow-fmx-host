@@ -22,6 +22,9 @@ FetchContent_Declare(JUCE
     GIT_SHALLOW    TRUE)
 FetchContent_MakeAvailable(JUCE)
 
+# lets dropped files reach the plugin with their real path (WebView2 only)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PatchJuce.cmake)
+
 # --- wasm3 (WebAssembly interpreter that runs the .fmx audio engine) ----------
 FetchContent_Declare(wasm3
     GIT_REPOSITORY https://github.com/wasm3/wasm3.git
