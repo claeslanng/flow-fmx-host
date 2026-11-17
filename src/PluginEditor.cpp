@@ -41,7 +41,15 @@ FlowFmxEditor::FlowFmxEditor (FlowFmxProcessor& p)
 
     setResizable (true, true);
     setResizeLimits (480, 320, 2400, 1800);
-    setSize (820, 600 + topBarHeight);
+    if (processor.editorSize.x > 0 && processor.editorSize.y > 0)
+    {
+        sizedForCurrentFmx = true;
+        setSize (processor.editorSize.x, processor.editorSize.y);
+    }
+    else
+    {
+        setSize (800, 600 + topBarHeight);
+    }
 
     rebuildWebView();
     startTimerHz (30);
@@ -85,6 +93,9 @@ void FlowFmxEditor::resized()
 
     if (web != nullptr)
         web->setBounds (getLocalBounds().withTrimmedTop (topBarHeight));
+
+    if (sizedForCurrentFmx)
+        processor.editorSize = { getWidth(), getHeight() };
 }
 
 //==============================================================================
@@ -166,7 +177,53 @@ juce::String FlowFmxEditor::buildBridgeScript() const
   window.addEventListener("drop", function (e) { e.preventDefault(); });
   document.addEventListener("DOMContentLoaded", function () {
     window.IPlugSendMsg({ msg: "__fmxReady" });
+    startFitToWindow();
   });
+
+  // Flow UIs are designed at a fixed size (e.g. 800x600). Scale the content to fit the
+  // plugin window, centred, and tell the host the natural size once it's known.
+  var lastZoom = 0, lastW = 0, lastH = 0;
+  function measure() {
+    var root = document.getElementById("root");
+    if (!root) return null;
+    // the content's real edges relative to its container, in unzoomed CSS pixels, so neither
+    // the zoom nor the centring padding below feed back into the result
+    var host = root, hr = host.getBoundingClientRect(), z = lastZoom || 1;
+    var l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+    for (var i = 0; i < host.children.length; i++) {
+      var c = host.children[i].getBoundingClientRect();
+      if (c.width <= 0 || c.height <= 0) continue;
+      l = Math.min(l, c.left); t = Math.min(t, c.top); r = Math.max(r, c.right); b = Math.max(b, c.bottom);
+    }
+    if (!isFinite(l)) return null;
+    return { w: Math.round((r - l) / z), h: Math.round((b - t) / z),
+             x: (l - hr.left) / z, y: (t - hr.top) / z };
+  }
+  function fit() {
+    var m = measure();
+    if (!m || m.w <= 0 || m.h <= 0) return;
+    if (Math.abs(m.w - lastW) > 2 || Math.abs(m.h - lastH) > 2) {
+      lastW = m.w; lastH = m.h;
+      window.IPlugSendMsg({ msg: "__fmxSize", width: m.w, height: m.h });
+    }
+    var z = Math.min(window.innerWidth / lastW, window.innerHeight / lastH);
+    if (!isFinite(z) || z <= 0) return;
+    if (Math.abs(z - lastZoom) > 0.0005) { document.documentElement.style.zoom = String(z); lastZoom = z; }
+    var px = (window.innerWidth  - lastW * z) / 2 / z - m.x;
+    var py = (window.innerHeight - lastH * z) / 2 / z - m.y;
+    var bs = document.body.style, nl = px.toFixed(1) + "px", nt = py.toFixed(1) + "px";
+    if (bs.marginLeft !== nl) bs.marginLeft = nl;
+    if (bs.marginTop !== nt) bs.marginTop = nt;
+  }
+  function startFitToWindow() {
+    var css = document.createElement("style");
+    css.textContent = "html{overflow:hidden;background:#0b0b0e}body{margin:0;overflow:hidden}";
+    document.head.appendChild(css);
+    window.addEventListener("resize", function () { requestAnimationFrame(fit); });
+    // no ResizeObserver: some Flow UIs report its harmless loop warning as a crash
+    var n = 0;
+    (function poll() { fit(); setTimeout(poll, ++n < 20 ? 100 : 500); })();
+  }
 })();
 )JS")
         .replace ("%META%", toJs (juce::var (meta)))
@@ -184,6 +241,7 @@ void FlowFmxEditor::rebuildWebView()
     }
 
     pageReady = false;
+    sizedForCurrentFmx = processor.editorSize.x > 0;
     lastSent.fill (-1.0f);
     lastTransportJson = {};
 
@@ -290,6 +348,16 @@ void FlowFmxEditor::handleUiMessage (const juce::var& m)
     {
         const int bins = m.hasProperty ("peakBins") ? (int) m["peakBins"] : 256;
         callJs ("__vstOnAudioFileInspected", processor.inspectAudioFile (m["path"].toString(), bins));
+    }
+    else if (type == "__fmxSize")
+    {
+        // first size report after loading an .fmx: open the window at the UI's natural size
+        const int w = (int) m["width"], h = (int) m["height"];
+        if (! sizedForCurrentFmx && w >= 200 && h >= 150 && w <= 2400 && h <= 1800)
+        {
+            sizedForCurrentFmx = true;
+            setSize (w, h + topBarHeight);
+        }
     }
     else if (type == "__fmxReady")
     {

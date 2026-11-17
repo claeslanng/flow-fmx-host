@@ -123,6 +123,9 @@ public:
         std::atomic<bool> playing { false }, looping { false };
     } transport;
 
+    /** Window size chosen by the user for the current .fmx ({0,0} = not set yet). */
+    juce::Point<int> editorSize;
+
     juce::var getHostInfo() const;
     juce::var getTransportInfo() const;
 

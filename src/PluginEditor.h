@@ -49,6 +49,7 @@ private:
     juce::String lastTransportJson;
     int tick = 0;
     bool pageReady = false;
+    bool sizedForCurrentFmx = false;
 
     static constexpr int topBarHeight = 30;
 

@@ -229,7 +229,10 @@ juce::Result FlowFmxProcessor::loadFmxText (const juce::String& json, const juce
     }
 
     if (resetParams)
+    {
         customState = juce::var (new juce::DynamicObject());
+        editorSize = {};
+    }
 
     // Initialise the new engine before it goes live
     for (auto& s : specs)
@@ -469,6 +472,8 @@ void FlowFmxProcessor::getStateInformation (juce::MemoryBlock& destData)
     state.setProperty ("fmxPath", fmxPath, nullptr);
     state.setProperty ("fmx", fmxText, nullptr); // embedded, so projects survive a moved/deleted .fmx
     state.setProperty ("customState", juce::JSON::toString (customState, true), nullptr);
+    state.setProperty ("editorWidth", editorSize.x, nullptr);
+    state.setProperty ("editorHeight", editorSize.y, nullptr);
 
     juce::ValueTree params ("Params");
     for (auto* s : slots)
@@ -499,6 +504,8 @@ void FlowFmxProcessor::setStateInformation (const void* data, int sizeInBytes)
     auto params = state.getChildWithName ("Params");
     for (auto* s : slots)
         s->setValue (static_cast<float> (params.getProperty ("p" + juce::String (s->slot), s->getValue())));
+
+    editorSize = { (int) state.getProperty ("editorWidth", 0), (int) state.getProperty ("editorHeight", 0) };
 
     auto cs = juce::JSON::parse (state["customState"].toString());
     customState = cs.isObject() ? cs : juce::var (new juce::DynamicObject());
