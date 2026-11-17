@@ -1,5 +1,9 @@
 #include "PluginEditor.h"
 
+#ifndef FMX_BUILD_ID
+ #define FMX_BUILD_ID "dev"
+#endif
+
 namespace
 {
     const juce::Colour background (0xff0b0b0e);
@@ -32,6 +36,19 @@ FlowFmxEditor::FlowFmxEditor (FlowFmxProcessor& p)
     loadButton.setColour (juce::TextButton::textColourOffId, accent.brighter (0.4f));
     loadButton.onClick = [this] { chooseFmx(); };
     addAndMakeVisible (loadButton);
+
+    closeButton.setColour (juce::TextButton::buttonColourId, juce::Colour (0xff26262c));
+    closeButton.setColour (juce::TextButton::textColourOffId, juce::Colours::white.withAlpha (0.8f));
+    closeButton.setTooltip ("Unload the current plugin and go back to the start screen");
+    closeButton.onClick = [this] { processor.unloadFmx(); };
+    addChildComponent (closeButton);
+
+    versionLabel.setText (juce::String::fromUTF8 ("Flow FMX Host v" JucePlugin_VersionString " \xc2\xb7 " FMX_BUILD_ID), juce::dontSendNotification);
+    versionLabel.setFont (juce::FontOptions (10.5f));
+    versionLabel.setColour (juce::Label::textColourId, juce::Colours::white.withAlpha (0.3f));
+    versionLabel.setJustificationType (juce::Justification::centredRight);
+    versionLabel.setInterceptsMouseClicks (false, false);
+    addAndMakeVisible (versionLabel);
 
     statusLabel.setColour (juce::Label::textColourId, juce::Colours::white.withAlpha (0.75f));
     statusLabel.setFont (juce::FontOptions (13.0f));
@@ -80,14 +97,22 @@ void FlowFmxEditor::paint (juce::Graphics& g)
 
         g.setColour (juce::Colours::white.withAlpha (0.5f));
         g.setFont (juce::FontOptions (14.0f));
-        g.drawFittedText ("or click \"Load .fmx...\" above", area.withTrimmedTop (40), juce::Justification::centred, 1);
+        g.drawFittedText ("or click \"Load Your Plugin\" above", area.withTrimmedTop (40), juce::Justification::centred, 1);
     }
 }
 
 void FlowFmxEditor::resized()
 {
     auto bar = getLocalBounds().removeFromTop (topBarHeight).reduced (4, 3);
-    loadButton.setBounds (bar.removeFromLeft (110));
+    loadButton.setBounds (bar.removeFromLeft (124));
+
+    if (closeButton.isVisible())
+    {
+        bar.removeFromLeft (6);
+        closeButton.setBounds (bar.removeFromLeft (100));
+    }
+
+    versionLabel.setBounds (bar.removeFromRight (juce::jmin (190, bar.getWidth() / 3)));
     bar.removeFromLeft (10);
     statusLabel.setBounds (bar);
 
@@ -246,6 +271,9 @@ juce::String FlowFmxEditor::buildBridgeScript() const
 void FlowFmxEditor::rebuildWebView()
 {
     statusLabel.setText (processor.getStatusText(), juce::dontSendNotification);
+    closeButton.setVisible (processor.hasFmx());
+    droppedPath.clear();
+    resized();
 
     if (web != nullptr)
     {

@@ -26,6 +26,7 @@ jobs:
         run: >
           cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -T ClangCL
           "-DJUCE_WEBVIEW2_PACKAGE_LOCATION=$($env:RUNNER_TEMP -replace '\\','/')/nuget"
+          "-DFMX_BUILD_ID=$($env:GITHUB_SHA.Substring(0,7))"
 
       - name: Build
         run: cmake --build build --config Release --parallel

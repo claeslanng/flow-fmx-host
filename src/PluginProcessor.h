@@ -87,6 +87,9 @@ public:
     juce::Result loadFmxFile (const juce::File& file);
     juce::Result loadFmxText (const juce::String& json, const juce::String& path, bool resetParams);
 
+    /** Unloads the current .fmx and returns to the empty state. */
+    void unloadFmx();
+
     bool hasFmx() const                                  { return fmxLoaded; }
     const fmx::FmxFile& getFmx() const                   { return fmx; }
     juce::String getFmxPath() const                      { return fmxPath; }

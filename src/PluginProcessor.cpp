@@ -83,7 +83,7 @@ FlowFmxProcessor::FlowFmxProcessor()
     }
 
     customState = juce::var (new juce::DynamicObject());
-    statusText = "No .fmx loaded";
+    statusText = "No plugin loaded";
 }
 
 FlowFmxProcessor::~FlowFmxProcessor()
@@ -277,6 +277,35 @@ juce::Result FlowFmxProcessor::loadFmxText (const juce::String& json, const juce
     updateHostDisplay (ChangeDetails().withParameterInfoChanged (true));
     sendChangeMessage();
     return juce::Result::ok();
+}
+
+void FlowFmxProcessor::unloadFmx()
+{
+    {
+        const juce::SpinLock::ScopedLockType sl (engineLock);
+        engine = {};
+        numTelemetry = 0;
+        heldNotes.reset();
+    }
+
+    for (auto* slot : slots)
+        slot->setSpec (nullptr);
+
+    fmx = {};
+    fmxText.clear();
+    fmxPath.clear();
+    fmxLoaded = false;
+    customState = juce::var (new juce::DynamicObject());
+    editorSize = {};
+    statusText = "No plugin loaded";
+
+    {
+        const juce::ScopedLock cl (audioCacheLock);
+        audioCache.retainOnly ({});
+    }
+
+    updateHostDisplay (ChangeDetails().withParameterInfoChanged (true));
+    sendChangeMessage();
 }
 
 //==============================================================================

@@ -41,7 +41,9 @@ private:
 
     FlowFmxProcessor& processor;
 
-    juce::TextButton loadButton { "Load .fmx..." };
+    juce::TextButton loadButton { "Load Your Plugin" };
+    juce::TextButton closeButton { "Close plugin" };
+    juce::Label versionLabel;
     juce::Label statusLabel;
     std::unique_ptr<juce::WebBrowserComponent> web;
     std::unique_ptr<juce::FileChooser> chooser;

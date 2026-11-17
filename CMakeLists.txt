@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(FlowFmxHost VERSION 0.1.0 LANGUAGES C CXX)
+project(FlowFmxHost VERSION 0.2.0 LANGUAGES C CXX)
+
+# short build identifier shown next to the version (CI passes the commit hash)
+set(FMX_BUILD_ID "dev" CACHE STRING "Build identifier shown in the plugin window")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -88,6 +91,7 @@ function(fmx_add_plugin target product code is_synth categories)
 
     target_compile_definitions(${target} PUBLIC
         FMX_IS_SYNTH=$<BOOL:${is_synth}>
+        FMX_BUILD_ID="${FMX_BUILD_ID}"
         JUCE_VST3_CAN_REPLACE_VST2=0
         JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1)
 

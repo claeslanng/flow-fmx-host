@@ -127,6 +127,14 @@ int main (int argc, char* argv[])
     check (restoredPeak > 0.1f, "restored instance plays (peak " + juce::String (restoredPeak, 3) + ")");
 #endif
 
+    // Close plugin: unload, check silence/empty state, then load again
+    p2->unloadFmx();
+    check (! p2->hasFmx() && ! p2->getSlot (0)->isActive(), "close plugin unloads it (" + p2->getStatusText() + ")");
+#if FMX_IS_SYNTH
+    check (renderBlocks (*p2, 10, on) == 0.0f, "no sound after closing the plugin");
+#endif
+    check (p2->loadFmxFile (fmxFile).wasOk() && p2->hasFmx(), "a plugin can be loaded again after closing");
+
     p.reset();
     p2.reset();
     wav.deleteFile();
