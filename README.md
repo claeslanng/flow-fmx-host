@@ -13,10 +13,6 @@ by **Claes Lanng Plugins**
 
 [**⬇ Download the latest version**](https://github.com/claeslanng/flow-fmx-host/releases/latest) · [Examples](#example-plugins) · [Install guide](#installation) · [How it works](#how-it-works)
 
-<br>
-
-<img src="docs/images/instrument.png" alt="Flow FMX Instrument running the Studio Sampler plugin" width="820">
-
 </div>
 
 ---
