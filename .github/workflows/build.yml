@@ -3,6 +3,9 @@ name: Build Windows plugins
 on:
   push:
     branches: [main]
+    paths-ignore:          # page-only changes don't need a new plugin build
+      - 'README.md'
+      - 'docs/images/**'
   pull_request:
   workflow_dispatch:
 

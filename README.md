@@ -11,7 +11,7 @@ by **Claes Lanng Plugins**
 ![Format](https://img.shields.io/badge/format-VST3-1f6feb)
 ![DAW](https://img.shields.io/badge/tested%20in-FL%20Studio-ff7a00)
 
-[**⬇ Download the latest version**](https://github.com/claeslanng/flow-fmx-host/releases/latest) · [Install guide](#installation) · [How it works](#how-it-works)
+[**⬇ Download the latest version**](https://github.com/claeslanng/flow-fmx-host/releases/latest) · [Examples](#example-plugins) · [Install guide](#installation) · [How it works](#how-it-works)
 
 <br>
 
@@ -45,7 +45,35 @@ It comes as two plugins:
 - 🎹 **Sample-accurate MIDI.** Notes are timed to the exact sample.
 - 🔁 **Swap plugins any time.** Use **Load Your Plugin** and **Close plugin** in the top bar.
 
-## Screenshots
+## Example plugins
+
+> **These are examples.** The plugins below are `.fmx` plugins made by Claes Lanng Plugins in
+> Google Flow Music, shown running inside Flow FMX Host in FL Studio. They are **not included**
+> with the download; Flow FMX Host loads the `.fmx` files you create yourself.
+
+<div align="center">
+
+<img src="docs/images/examples/studio-sampler.png" alt="Example: Studio Sampler instrument in Flow FMX Instrument" width="640"><br>
+<sub><b>Example: Studio Sampler</b> · instrument · polyphonic sampler with loop points, envelope, filter and pitch wheel, in <i>Flow FMX Instrument</i></sub>
+
+</div>
+
+<br>
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/examples/pitchscope.png" alt="Example: PitchScope effect in Flow FMX Effect"><br>
+      <sub><b>Example: PitchScope</b> · effect · tuner and key detector, in <i>Flow FMX Effect</i></sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/examples/monosafe.png" alt="Example: MonoSafe effect in Flow FMX Effect"><br>
+      <sub><b>Example: MonoSafe</b> · effect · four-band stereo width and mono-compatibility tool, in <i>Flow FMX Effect</i></sub>
+    </td>
+  </tr>
+</table>
+
+## The host
 
 <table>
   <tr>
@@ -86,7 +114,6 @@ It comes as two plugins:
 - The version and build number appear in the top-right corner of the plugin window. Include them when you report a problem.
 - Audio samples you load inside a Flow plugin are saved by file path, so keep them where they are.
 - **Close plugin** clears the loaded plugin and its settings for that instance.
-- *Flow FMX Effect* is newer and has had less testing with real Flow effects than the Instrument.
 
 ## How it works
 
