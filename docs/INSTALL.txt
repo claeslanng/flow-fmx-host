@@ -1,5 +1,5 @@
-Flow FMX Host - install guide (Windows, FL Studio)
-===================================================
+Flow FMX Host by Claes Lanng Plugins - install guide (Windows, FL Studio)
+=========================================================================
 
 This zip contains two plugins:
 
@@ -16,7 +16,9 @@ This zip contains two plugins:
 2. FIND THEM IN FL STUDIO
    - Open FL Studio.
    - Options > Manage plugins > click "Find more plugins" (or "Start scan").
-   - "Flow FMX Instrument" now appears under Generators.
+   - "Flow FMX Instrument" now appears under Generators (vendor:
+     Claes Lanng Plugins). If you had an older version installed, rescan so
+     FL Studio picks up the new vendor name.
 
 3. USE IT
    - Add "Flow FMX Instrument" to the Channel Rack (like any synth).

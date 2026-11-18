@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(FlowFmxHost VERSION 0.2.1 LANGUAGES C CXX)
+project(FlowFmxHost VERSION 0.3.0 LANGUAGES C CXX)
 
 # short build identifier shown next to the version (CI passes the commit hash)
 set(FMX_BUILD_ID "dev" CACHE STRING "Build identifier shown in the plugin window")
@@ -68,7 +68,8 @@ target_compile_definitions(fmx_engine INTERFACE
 # --- plugins ------------------------------------------------------------------
 function(fmx_add_plugin target product code is_synth categories)
     juce_add_plugin(${target}
-        COMPANY_NAME            "FlowFmxHost"
+        COMPANY_NAME            "Claes Lanng Plugins"
+        COMPANY_WEBSITE         "https://github.com/claeslanng/flow-fmx-host"
         BUNDLE_ID               "com.flowfmxhost.${target}"
         PLUGIN_MANUFACTURER_CODE Ffmx
         PLUGIN_CODE             ${code}

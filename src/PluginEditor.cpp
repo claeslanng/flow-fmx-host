@@ -43,7 +43,7 @@ FlowFmxEditor::FlowFmxEditor (FlowFmxProcessor& p)
     closeButton.onClick = [this] { processor.unloadFmx(); };
     addChildComponent (closeButton);
 
-    versionLabel.setText (juce::String::fromUTF8 ("Flow FMX Host v" JucePlugin_VersionString " \xc2\xb7 " FMX_BUILD_ID), juce::dontSendNotification);
+    versionLabel.setText (juce::String::fromUTF8 (JucePlugin_Manufacturer "  \xc2\xb7  Flow FMX Host v" JucePlugin_VersionString " \xc2\xb7 " FMX_BUILD_ID), juce::dontSendNotification);
     versionLabel.setFont (juce::FontOptions (10.5f));
     versionLabel.setColour (juce::Label::textColourId, juce::Colours::white.withAlpha (0.3f));
     versionLabel.setJustificationType (juce::Justification::centredRight);
@@ -91,13 +91,25 @@ void FlowFmxEditor::paint (juce::Graphics& g)
         g.setColour (juce::Colours::white.withAlpha (0.12f));
         g.drawRoundedRectangle (area.toFloat(), 12.0f, 2.0f);
 
-        g.setColour (juce::Colours::white.withAlpha (0.8f));
-        g.setFont (juce::FontOptions (20.0f, juce::Font::bold));
-        g.drawFittedText ("Drop a Google Flow .fmx file here", area.withTrimmedBottom (40), juce::Justification::centred, 1);
+        auto centre = area.withSizeKeepingCentre (area.getWidth(), 150);
+
+        g.setColour (accent);
+        g.setFont (juce::FontOptions (13.0f, juce::Font::bold));
+        g.drawFittedText (juce::String (JucePlugin_Name).toUpperCase(), centre.removeFromTop (24), juce::Justification::centred, 1);
+
+        g.setColour (juce::Colours::white.withAlpha (0.85f));
+        g.setFont (juce::FontOptions (22.0f, juce::Font::bold));
+        g.drawFittedText ("Drop a Google Flow .fmx file here", centre.removeFromTop (44), juce::Justification::centred, 1);
 
         g.setColour (juce::Colours::white.withAlpha (0.5f));
         g.setFont (juce::FontOptions (14.0f));
-        g.drawFittedText ("or click \"Load Your Plugin\" above", area.withTrimmedTop (40), juce::Justification::centred, 1);
+        g.drawFittedText ("or click \"Load Your Plugin\" above", centre.removeFromTop (26), juce::Justification::centred, 1);
+
+        g.setColour (juce::Colours::white.withAlpha (0.28f));
+        g.setFont (juce::FontOptions (12.0f));
+        g.drawFittedText (FMX_IS_SYNTH ? "For Flow instruments. Effects go in \"Flow FMX Effect\"."
+                                       : "For Flow effects. Instruments go in \"Flow FMX Instrument\".",
+                          centre.removeFromTop (40), juce::Justification::centredBottom, 1);
     }
 }
 
@@ -112,7 +124,7 @@ void FlowFmxEditor::resized()
         closeButton.setBounds (bar.removeFromLeft (100));
     }
 
-    versionLabel.setBounds (bar.removeFromRight (juce::jmin (190, bar.getWidth() / 3)));
+    versionLabel.setBounds (bar.removeFromRight (juce::jmin (300, bar.getWidth() / 2 - 40)));
     bar.removeFromLeft (10);
     statusLabel.setBounds (bar);
 

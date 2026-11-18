@@ -58,9 +58,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          $version = (Select-String -Path CMakeLists.txt -Pattern 'project\(FlowFmxHost VERSION ([0-9.]+)').Matches[0].Groups[1].Value
+          $short = $env:GITHUB_SHA.Substring(0,7)
+          $notes = @"
+          ## Flow FMX Host v$version
+          Windows VST3 host for Google Flow ``.fmx`` plugins, by **Claes Lanng Plugins**.
+
+          **Download** ``FlowFMX-Windows-x64.zip`` below, unzip it, and copy both ``.vst3`` folders to ``C:\Program Files\Common Files\VST3``. Full steps are in ``INSTALL.txt`` inside the zip.
+
+          Build ``$short`` (shown in the plugin's top-right corner).
+          "@
           gh release delete latest --yes --cleanup-tag 2>$null
           $global:LASTEXITCODE = 0
           gh release create latest FlowFMX-Windows-x64.zip `
             --target $env:GITHUB_SHA `
-            --title "Latest build" `
-            --notes "Automatic build of commit $env:GITHUB_SHA. Download FlowFMX-Windows-x64.zip below and see INSTALL.txt inside."
+            --title "Flow FMX Host v$version" `
+            --notes $notes
