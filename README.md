@@ -10,6 +10,7 @@ by **Claes Lanng Plugins**
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6)
 ![Format](https://img.shields.io/badge/format-VST3-1f6feb)
 ![DAW](https://img.shields.io/badge/tested%20in-FL%20Studio-ff7a00)
+![License](https://img.shields.io/badge/license-AGPLv3-555)
 
 [**⬇ Download the latest version**](https://github.com/claeslanng/flow-fmx-host/releases/latest) · [Examples](#example-plugins) · [Install guide](#installation) · [How it works](#how-it-works)
 
@@ -150,8 +151,14 @@ and saves and restores the state. Each passing build is published as the latest 
 
 ## Credits
 
-- Developed by **Claes Lanng Plugins**
-- Built on [JUCE](https://juce.com) and [wasm3](https://github.com/wasm3/wasm3)
+- Developed by **Claes Lanng Plugins** · [claeslanng.shop](https://claeslanng.shop)
+- Built on [JUCE](https://juce.com) and [wasm3](https://github.com/wasm3/wasm3) (MIT)
+
+## License
+
+Flow FMX Host is free software, licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPLv3).
+You may use, study, share and modify it. If you distribute a modified version, you must share its source
+under the same licence.
 
 <sub>Flow FMX Host is an independent project and is not affiliated with, endorsed by, or connected to Google.
-Google and Flow are trademarks of Google LLC. JUCE is used under the AGPLv3 / JUCE licence.</sub>
+Google and Flow are trademarks of Google LLC.</sub>
